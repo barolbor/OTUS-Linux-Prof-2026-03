@@ -26,5 +26,6 @@ Get-NetTCPConnection -LocalPort 8080 | Select-Object LocalAddress, LocalPort, Re
 ![Порт 8080](8080.jpg)
 
 Скриншот с хоста http://localhost:8080/
+
 ![Порт 8080](nginx.jpg)
 
