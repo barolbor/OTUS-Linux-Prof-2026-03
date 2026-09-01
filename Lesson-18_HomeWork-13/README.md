@@ -17,11 +17,14 @@ Vagrant файл создает VM с гостевой ОС bento/ubuntu-26.04 �
 Весь провижинг выполнен на SHELL'е, т.к. Windows не дружит c Ansible.
 
 Скриншот вывода команды df -h
-![Меню загрузки](df-h.jpg)
+![Результат df -h](df-h.jpg)
 
 Скриншот с хостовой машины вывода команды netstat -tulpn | grep 8080 с запущенной ВМ заменен аналогом PS в Windows:
 
 Get-NetTCPConnection -LocalPort 8080 | Select-Object LocalAddress, LocalPort, RemoteAddress,  RemotePort, State, OwningProcess | ForEach-Object { $_ | Add-Member -NotePropertyName ProcessName -NotePropertyVal (Get-Process -Id $_.OwningProcess).Name -PassThru } | Format-Table
 
-![Меню загрузки](8080.jpg)
+![Порт 8080](8080.jpg)
+
+Скриншот с хоста http://localhost:8080/
+![Порт 8080](nginx.jpg)
 
