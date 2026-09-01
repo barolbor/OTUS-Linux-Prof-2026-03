@@ -1,0 +1,21 @@
+---
+- name: Configure web Server
+  hosts: all
+  become: true
+
+  tasks:
+    - name: Update apt cache and upgrade all packages
+      ansible.builtin.apt:
+        update_cache: yes
+        upgrade: dist
+
+    - name: Install nginx
+      ansible.builtin.apt
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: Deploy index.html
+      ansible.builtin.copy
+        content: "<h1>Hellow Worl from Vagrant + Ansible!</h1>"
+        dest: /var/www/html/index.html
