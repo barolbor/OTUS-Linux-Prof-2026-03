@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+    <h1>Welcome to nginx on {{ ansible_facts['hostname'] }}</h1>
+    <p>Server default IP v4 address: {{ ansible_facts['default_ipv4']['address'] }}</p>
+    <p>Server all IP v4 addresses: {{ ansible_all_ipv4_addresses }}
+    <p>Server HTTP port: {{ nginx_listen_port }}</p>
+</body>
+</html>

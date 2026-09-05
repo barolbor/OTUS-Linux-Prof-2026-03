@@ -1,0 +1,22 @@
+---
+- name: Update and Upgrade
+  hosts: web
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Update apt packages, not upgrade -  wait a long time.
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        #upgrade: safe
+      tags:
+        - update apt
+
+- name: NGINX | Install ang configure
+  hosts: web
+  gather_facts: true
+  become: true
+  roles:
+    - nginx
+
+

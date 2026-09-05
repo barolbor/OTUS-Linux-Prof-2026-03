@@ -1,0 +1,20 @@
+---
+# Will always restart the unit
+- name: restart nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: restarted
+    enabled: yes
+
+# Will always reload and if the service is not running at the moment of the reload, it is started.
+- name: reload nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: reloaded
+
+# Is idempotent start that will not run command start unless necessary (if the service alrady ranning)
+- name: start nginx
+  ansible.builtin.systemd_service:
+    name: nginx
+    state: started
+    enabled: true

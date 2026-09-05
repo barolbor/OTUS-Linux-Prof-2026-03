@@ -1,0 +1,31 @@
+---
+- name: Install nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: latest
+  notify:
+    - restart nginx
+  tags:
+    - nginx-package
+
+- name: Create nginx config file from template
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    backup: true
+  notify:
+    - reload nginx
+  tags:
+    - nginx-configuration
+
+- name: Deploy server info HTML
+  ansible.builtin.template:
+    src: nginx_index.html.j2
+    #dest: /var/www/html/index.html
+    dest: /usr/share/nginx/html/index.html
+    mode: '0644'
+    backup: true
+#  notify:
+#    - reload nginx
+  tags:
+    - nginx-deploy-index
