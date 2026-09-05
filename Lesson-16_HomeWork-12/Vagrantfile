@@ -1,0 +1,90 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+MACHINES = {
+  :nginx => {
+#        :box_name => "generic/ubuntu2204",
+        :box_name => "bento/ubuntu-26.04",
+        :vm_name => "nginx",
+        :net => [
+           ["192.168.11.150",  2, "255.255.255.0", "mynet"],
+        ],
+        :port_forward => {
+          :guest => 8080,
+          :host => 8080
+        }
+  },
+  :ansible => {
+        :box_name => "bento/ubuntu-26.04",
+        :vm_name => "ansible",
+        :net => [
+           ["192.168.11.151",  2, "255.255.255.0", "mynet"],
+        ]	
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES.each do |boxname, boxconfig|
+
+    config.vm.define boxname do |box|
+   
+      box.vm.box = boxconfig[:box_name]
+      box.vm.host_name = boxconfig[:vm_name]
+      
+      box.vm.provider "virtualbox" do |v|
+        v.memory = 768
+        v.cpus = 1
+       end
+
+      boxconfig[:net].each do |ipconf|
+        box.vm.network("private_network", ip: ipconf[0], adapter: ipconf[1], netmask: ipconf[2], virtualbox__intnet: ipconf[3])
+      end
+
+      if boxconfig.key?(:public)
+        box.vm.network "public_network", boxconfig[:public]
+      end
+
+      if boxconfig.key?(:port_forward)
+        box.vm.network "forwarded_port", guest: boxconfig[:port_forward][:guest], host: boxconfig[:port_forward][:host]
+      end
+
+      box.vm.provision "shell", inline: <<-SHELL
+        mkdir -p ~root/.ssh
+        cp ~vagrant/.ssh/auth* ~root/.ssh
+        sudo sed -i 's/\#PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+        systemctl restart sshd
+      SHELL
+
+      # Initially wanted to split provision into separate files nginx.sh and ansible.sh
+      #box.vm.provision "shell", path: "#{boxconfig[:vm_name]}.sh"
+
+      # For host nginx the preparation will be performed from host ansible using the ansible program
+      # For host ansimble the provision will be here using inline shell
+      # Provision ansible host
+      if boxconfig[:vm_name] == "ansible"
+        box.vm.provision "file", source: "./.vagrant/machines/nginx/virtualbox/private_key", destination: "~vagrant/.ssh/nginx_private_key"
+        box.vm.synced_folder "./ansible/", "/home/vagrant/host_folder/"
+        #box.vm.provision "file", source: "./ansible/*", destination: "~vagrant/ansible/"
+        box.vm.provision "shell", inline: <<-SHELL
+          chmod 600 ~vagrant/.ssh/nginx_private_key
+          chown vagrant:vagrant ~vagrant/.ssh/nginx_private_key
+          apt-get update
+          #wait a very long time
+          #apt-get upgrade -y
+          apt-get install -y ansible
+          # Ansible will not automatically load a config file from the current working directory if the directory is world-writable.
+          rm -rf ~vagrant/ansible
+          mkdir -p ~vagrant/ansible
+          chmod 770 ~vagrant/ansible
+          # current own: root:root
+          cp -r ~vagrant/host_folder/* ~vagrant/ansible/
+          chown -R vagrant:vagrant ~vagrant/ansible
+          cd ~vagrant/ansible
+          ansible-playbook playbook.yml
+        SHELL
+      end
+
+    end
+  end
+end
