@@ -1,0 +1,78 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Configuration version 2
+Vagrant.configure("2") do |config|
+
+  # Box bento/ubuntu-26.04
+  config.vm.box = "bento/ubuntu-26.04"
+  # Set hostname
+  config.vm.hostname = "dock-obb"
+  # Disable automatic box update checking.
+  config.vm.box_check_update = false
+  # Forwarding port 8080 from host to VM port 8080
+  config.vm.network "forwarded_port", guest: 8080, host: 8080
+
+  # Fine-tune various backing providers for Vagrant.
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false  
+    # Customize the amount of memory on the VM:
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+
+  config.vm.provision "file", source: "./Docker/Dockerfile", destination: "~vagrant/docker/"
+  config.vm.provision "file", source: "./Docker/nginx.conf", destination: "~vagrant/docker/"
+  config.vm.provision "file", source: "./Docker/index.html", destination: "~vagrant/docker/"
+
+  config.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    # Docker: Uninstall old versions and conflicting packages
+    apt-get -y remove $(dpkg --get-selections docker.io docker-compose docker-compose-v2 docker-doc docker-buildx podman-docker containerd runc | cut -f1)
+    # Docker: Add Docker's official GPG key:
+    apt-get -y install ca-certificates curl
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+
+    # Loading OS system variables (including VERSION_CODENAME)
+    . /etc/os-release
+    CODENAME="${UBUNTU_CODENAME:-$VERSION_CODENAME}"
+    ARCHITECTURE="$(dpkg --print-architecture)"
+
+    # Add the repository to Apt sources:
+    tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: ${CODENAME}
+Components: stable
+Architectures: ${ARCHITECTURE}
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+    apt-get update
+    apt-get -y install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+    if systemctl is-active --quiet docker; then
+      echo "Docker is running"
+    else
+      systemctl start docker
+    fi
+    
+    # Add user vagrant to group docker (to run doker command without using sudo)
+    usermod -aG docker vagrant
+
+    chmod 770 ~vagrant/docker
+    # current own: root:root
+    #cp -r ~vagrant/host_folder/* ~vagrant/docker/
+    chown -R vagrant:vagrant ~vagrant/docker
+    cd ~vagrant/docker
+
+    docker build -t nginx-obb .
+    docker run -dt --name nginx_obb --restart always -p 8080:80 nginx-obb
+    #docker run -dt --name nginx_obb -p 8080:80 nginx-obb
+  SHELL
+
+end
