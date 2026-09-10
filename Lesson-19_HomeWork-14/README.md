@@ -34,7 +34,7 @@ curl http://localhost:8080
 ```
 ![http://localhost:8080](doc_obb_curl.jpg)
 
-### Разместить образ в Docker hub
+### Разместим образ на Docker hub
 
 ```bash
 
@@ -57,7 +57,7 @@ nginx-obb:latest            b91bd1426313       16.1MB         4.75MB    U
 # Подключимся к Docker хабу
 docker login --username barolbor
 
-# Разместим образ на Dockr хабе
+# Разместим образ на Docker хабе
 docker push barolbor/nginx-obb:latest
 The push refers to repository [docker.io/barolbor/nginx-obb]
 44136fa355b3: Pushed
