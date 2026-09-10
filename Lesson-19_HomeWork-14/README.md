@@ -34,6 +34,44 @@ curl http://localhost:8080
 ```
 ![http://localhost:8080](doc_obb_curl.jpg)
 
+### Разместить образ в Docker hub
+
+```bash
+
+# Список образов
+docker image ls
+
+IMAGE              ID             DISK USAGE   CONTENT SIZE   EXTRA
+nginx-obb:latest   b91bd1426313       16.1MB         4.75MB    U
+
+# Добавим к нашему образу тэг имя_пользователя/имя_репозитория:тэг
+docker tag nginx-obb barolbor/nginx-obb:latest
+
+# Проверим
+docker image ls
+
+IMAGE                       ID             DISK USAGE   CONTENT SIZE   EXTRA
+barolbor/nginx-obb:latest   b91bd1426313       16.1MB         4.75MB    U
+nginx-obb:latest            b91bd1426313       16.1MB         4.75MB    U
+
+# Подключимся к Docker хабу
+docker login --username barolbor
+
+# Разместим образ на Dockr хабе
+docker push barolbor/nginx-obb:latest
+The push refers to repository [docker.io/barolbor/nginx-obb]
+44136fa355b3: Pushed
+19697a3dd18b: Pushed
+55afa1ecc21d: Pushed
+6acd3aa3345c: Pushed
+6107edcde33e: Pushed
+416c33d0479e: Pushed
+latest: digest: sha256:b91bd1426313f0c6dcfa16a2bd245e77e84a2d025b95660e70ccd27413cb18ee size: 856
+```
+
+После загрузки образ доступен по адресу: [https://hub.docker.com/repository/docker/barolbor/nginx-obb/general](https://hub.docker.com/repository/docker/barolbor/nginx-obb/general)
+
+
 ### Разница между образом и контейнером:
 
 Главное отличие заключается в том, что образ — это неизменяемый шаблон (класс — код и структура) | (программа), а контейнер — это запущенный экземпляр этого шаблона (объект — экземпляр класса в памяти) | (процесс).
