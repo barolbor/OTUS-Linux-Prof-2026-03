@@ -1,0 +1,41 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Configuration version 2
+Vagrant.configure("2") do |config|
+
+  # Specify the number of disks
+  num_disks = 5
+  # Set the disk size in bytes
+  disk_size = 1073741824
+  # RAID device
+  raid_dev = "/dev/md0"
+  # Number of parts
+  num_parts = 5
+
+  # Box bento/ubuntu-24.04
+  config.vm.box = "bento/ubuntu-24.04"
+  # Set hostname
+  config.vm.hostname = "raid-obb"
+  # Disable automatic box update checking.
+  config.vm.box_check_update = false
+
+  # Fine-tune various backing providers for Vagrant.
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false  
+    # Customize the amount of memory on the VM:
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+
+  # Attaching 5 hard disks: disk-1 ... disk-i
+  # This name is used as the filename when creating a virtual hard disk.
+  (1..num_disks).each do |i|
+    config.vm.disk :disk, size: disk_size, name: "disk-#{i}"
+  end
+
+  # Shell provision: Create RAID-10
+  config.vm.provision "shell", args: [num_disks, disk_size, raid_dev], path: "create-raid-10.sh"
+  config.vm.provision "shell", args: [raid_dev, num_parts], path: "create-gpt.sh"
+end
