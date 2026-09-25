@@ -39,7 +39,7 @@ Vagrant файл создает ВМ с гостевой ОС bento/ubuntu-24.04
 ### Сломать и починить RAID
 
 ```bash
-# Из строя вышело устройство  /dev/sdb
+# Из строя вышло устройство  /dev/sdb
 sudo mdadm /dev/md0 --fail /dev/sdb
 mdadm: set /dev/sdb faulty in /dev/md0
 
