@@ -1,0 +1,40 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Configuration version 2
+Vagrant.configure("2") do |config|
+
+  # Specify the number of disks
+  num_disks = 10
+  # Set the disk size in bytes
+  disk_size = 1073741824
+
+  # Box bento/ubuntu-24.04
+  config.vm.box = "bento/ubuntu-24.04"
+  # Set hostname
+  config.vm.hostname = "zfs-obb"
+  # Disable automatic box update checking.
+  config.vm.box_check_update = false
+
+  # Fine-tune various backing providers for Vagrant.
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false  
+    # Customize the amount of memory on the VM:
+    vb.memory = "8192"
+    vb.cpus = 2
+  end
+
+  # Attaching 5 hard disks: disk-1 ... disk-i
+  # This name is used as the filename when creating a virtual hard disk.
+  (1..num_disks).each do |i|
+    config.vm.disk :disk, size: disk_size, name: "disk-#{i}"
+  end
+
+  config.vm.provision "shell", inline: <<-'SHELL'
+    echo 'force_color_prompt=yes' >> /root/.bashrc
+    echo "PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
+  EOF
+  SHELL
+
+end
