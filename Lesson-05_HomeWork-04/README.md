@@ -111,7 +111,7 @@ zfs_3  compression  lzjb            local
 zfs_4  compression  lz4             local
 zfs_5  compression  zstd            local
 
-# Скачаем дам демонстрационной базу данных PostgreSQL авиаперевозки по России.
+# Скачаем дамп демонстрационной базы данных PostgreSQL авиаперевозки по России.
 wget -O ~/archive.zip "https://edu.postgrespro.ru/demo-small-20170815.zip" && unzip ~/archive.zip -d ./ && rm ~/archive.zip
 
 # Копируем скачанный дамп на все пулы
