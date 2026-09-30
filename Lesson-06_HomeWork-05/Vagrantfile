@@ -1,0 +1,63 @@
+# -*- mode: ruby -*-
+# vim: set ft=ruby :
+
+srv_ip = "192.168.11.150"
+cli_ip = "192.168.11.151"
+
+MACHINES = {
+  :srv => {
+        :box_name => "bento/ubuntu-24.04",
+        :vm_name => "nfs-srv",
+        :net => [
+           [srv_ip, 2, "255.255.255.0", "mynet"],
+        ],
+        :script => [
+           ["nfs-srv.sh", cli_ip],
+        ]
+  },
+  :cli => {
+        :box_name => "bento/ubuntu-24.04",
+        :vm_name => "nfs-cli",
+        :net => [
+           [cli_ip, 2, "255.255.255.0", "mynet"],
+        ],
+        :script => [
+          ["nfs-cli.sh", srv_ip],
+        ]
+  }
+}
+
+Vagrant.configure("2") do |config|
+
+  MACHINES.each do |boxname, boxconfig|
+
+    config.vm.define boxname do |box|
+   
+      box.vm.box = boxconfig[:box_name]
+      box.vm.host_name = boxconfig[:vm_name]
+      
+      box.vm.provider "virtualbox" do |v|
+        v.memory = 2048
+        v.cpus = 2
+       end
+
+      boxconfig[:net].each do |ipconf|
+        box.vm.network("private_network", ip: ipconf[0], adapter: ipconf[1], netmask: ipconf[2], virtualbox__intnet: ipconf[3])
+      end
+
+      if boxconfig.key?(:public)
+        box.vm.network "public_network", boxconfig[:public]
+      end
+
+      if boxconfig.key?(:port_forward)
+        box.vm.network "forwarded_port", guest: boxconfig[:port_forward][:guest], host: boxconfig[:port_forward][:host]
+      end
+
+      boxconfig[:script].each do |script_cfg|
+        script_path, script_arg = script_cfg
+        config.vm.provision "shell", args: [script_arg], path: script_path
+      end
+
+    end
+  end
+end
