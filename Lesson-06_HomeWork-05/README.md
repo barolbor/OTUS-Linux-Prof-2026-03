@@ -12,7 +12,7 @@
 
 ### Vagrant 2.4.9, VirtualBox 7.2.16, на хосте с ОС Windows 11
 
-[Vagrant](Vagrant) файл создает 2 ВМ с гостевой ОС bento/ubuntu-24.04 со следующими параметрами:
+[Vagrantfile](Vagrantfile) файл создает 2 ВМ с гостевой ОС bento/ubuntu-24.04 со следующими параметрами:
 * ОЗУ 2048Мб, CPU 2;
 * выполняет провижинг:
   * для сервера [nfs-srv.sh](nfs-srv.sh)
