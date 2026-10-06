@@ -1,0 +1,29 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Configuration version 2
+Vagrant.configure("2") do |config|
+
+  # Box bento/ubuntu-24.04
+  config.vm.box = "bento/ubuntu-24.04"
+  # Set hostname
+  config.vm.hostname = "boot-obb"
+  # Disable automatic box update checking.
+  config.vm.box_check_update = false
+
+  # Fine-tune various backing providers for Vagrant.
+  config.vm.provider "virtualbox" do |vb|
+    # Display the VirtualBox GUI when booting the machine
+    vb.gui = false  
+    # Customize the amount of memory on the VM:
+    vb.memory = "2048"
+    vb.cpus = 2
+  end
+
+  config.vm.provision "shell", inline: <<-'SHELL'
+    echo 'force_color_prompt=yes' >> /root/.bashrc
+    echo "PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '" >> /root/.bashrc
+  EOF
+  SHELL
+
+end
